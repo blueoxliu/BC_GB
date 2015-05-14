@@ -1,0 +1,15 @@
+﻿<ResourceDictionary 
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <BitmapSource x:Key="GatewayImageSource">Images/gwicon.png</BitmapSource>
+    
+    <Image x:Key="Scan" x:Shared="False" Source="Images/scan.png" Height="16" Width="16"/>
+    <Image x:Key="About" x:Shared="False" Source="Images/about.png" Height="16" Width="16"/>
+    <Image x:Key="Add" x:Shared="False" Source="Images/add.png" Height="16" Width="16"/>
+    <Image x:Key="Config" x:Shared="False" Source="Images/setup.png" Height="16" Width="16"/>
+    <Image x:Key="ConfigLarge" x:Shared="False" Source="Images/setuplarge.png" Height="20" Width="20"/>
+
+
+
+</ResourceDictionary>

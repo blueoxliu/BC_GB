@@ -1,0 +1,91 @@
+﻿<Window
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:IPBox="clr-namespace:GatewayBrowser.UserControls.IPBox"
+          xmlns:uc="clr-namespace:GatewayBrowser.Help"
+          xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" x:Class="GatewayBrowser.Views.SetIPConfigView"
+          WindowStartupLocation="CenterOwner"
+          ResizeMode="NoResize"
+          Title="IP Configuration"
+          Icon="{StaticResource GatewayImageSource}"
+          Width="450" Height="398">
+    <DockPanel Margin="5">
+        <StackPanel DockPanel.Dock="Bottom" Style="{StaticResource buttonPanel}">
+            <Button Content="OK" Click="OK_Click" />
+            <Button Content="Close" Click="Close_Click" />
+        </StackPanel>
+
+        <Grid DockPanel.Dock="Top" x:Name="grd_Port1">
+            <GroupBox BorderBrush="{StaticResource lightBlueBrush}">
+                <GroupBox.Header>
+                    <Border Background="{StaticResource greenBrush}"
+						Style="{StaticResource groupBoxHeader}">
+                        <TextBlock Text="Port1" />
+                    </Border>
+                </GroupBox.Header>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="110" />
+                        <ColumnDefinition Width="150" />
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="30" />
+                        <RowDefinition Height="30" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Label Content="Name:" Width="100" Height="28" VerticalAlignment="Top" />
+                    <Label Content="ifcname" x:Name="lbl_IfcName_p1" Grid.Column="1" Width="150" Height="28" VerticalAlignment="Top" HorizontalAlignment="Left" />
+
+                    <Label Grid.Row="1" Content="IP Address:" Width="100" Height="28" VerticalAlignment="Top" />
+                    <IPBox:IPTextBoxControl  x:Name="txt_IPAddress_p1" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" HorizontalAlignment="Left"  VerticalAlignment="Top" />
+
+                    <Label Grid.Row="2" Content="Network Mask:" Width="100" />
+                    <IPBox:IPTextBoxControl  x:Name="txt_NetworkMask_p1" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Top"  />
+
+                    <Label Grid.Row="3" Content="MAC Address:" Width="100" Height="28" VerticalAlignment="Top" />
+                    <Label Content="00000000" x:Name="txt_MAC_p1" Grid.Row="3" Grid.Column="1" Width="150" Height="28" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                </Grid>
+            </GroupBox>
+        </Grid>
+        <Grid x:Name="grd_Port2">
+            <GroupBox BorderBrush="{StaticResource lightBlueBrush}">
+                <GroupBox.Header>
+                    <Border Background="{StaticResource greenBrush}"
+						Style="{StaticResource groupBoxHeader}">
+                        <TextBlock Text="Port2" />
+                    </Border>
+                </GroupBox.Header>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="110" />
+                        <ColumnDefinition Width="150" />
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="30" />
+                        <RowDefinition Height="30" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Label Content="Name:" Width="100" Height="28" VerticalAlignment="Top" />
+                    <Label Content="ifcname" x:Name="lbl_IfcName_p2" Grid.Column="1" Width="150" Height="28" VerticalAlignment="Top" HorizontalAlignment="Left" />
+
+                    <Label Grid.Row="1" Content="IP Address:" Width="100" Height="28" VerticalAlignment="Top" />
+                    <IPBox:IPTextBoxControl  x:Name="txt_IPAddress_p2" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" HorizontalAlignment="Left"  VerticalAlignment="Top" />
+
+                    <Label Grid.Row="2" Content="Network Mask:" Width="100" />
+                    <IPBox:IPTextBoxControl  x:Name="txt_NetworkMask_p2" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Top"  />
+
+                    <Label Grid.Row="3" Content="MAC Address:" Width="100" Height="28" VerticalAlignment="Top" />
+                    <Label Content="00000000" x:Name="txt_MAC_p2" Grid.Row="3" Grid.Column="1" Width="150" Height="28" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                </Grid>
+            </GroupBox>
+        </Grid>
+    </DockPanel>
+</Window>
