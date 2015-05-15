@@ -29,7 +29,7 @@ namespace GatewayBrowser.Help
         private const int MAX_IPS_TO_SEARCH = 20;
 
         // listener socket that will receive responses from the slave devices
-        private UdpClient listenerSocket;
+        private List<UdpClient> listenerSockets;
 
         private BecaonDevice deviceConfig;
 
@@ -54,26 +54,89 @@ namespace GatewayBrowser.Help
         public BeaconDiscoveryService(ApplicationPresenter applicationPresenter)
         {
             _applicationPresenter = applicationPresenter;
-
             deviceConfig = null;
-
             // Create the Listening Socket 
             // Create the socket using 0 as the port so we get
             // an available free socket port
-            IPEndPoint endPoint = new IPEndPoint(IPAddress.Any, 9999);
-            listenerSocket = new UdpClient(endPoint);
+            listenerSockets = new List<UdpClient>();
 
-            // Create the state. The state will be used to transfer data to event functions
-            UdpState state = new UdpState();
-            state.endPoint = endPoint;
-            state.listenerSocket = listenerSocket;
-            state.discoveryService = this; 
 
-            // Debugging code to show the UDP port that we are bind to
-            System.Diagnostics.Debug.Print("Local UDP Port: {0}", ((IPEndPoint)(listenerSocket.Client.LocalEndPoint)).Port);
+            //try
+            //{
+            //    IPEndPoint endPoint = new IPEndPoint(IPAddress.Any, beaconDiscoveryListenPort);
+            //    listenerSocket = new UdpClient(endPoint);
 
-            // Start the listening process as a callback
-            listenerSocket.BeginReceive(new AsyncCallback(UDPReceiveCallback), state);
+            //    // Create the state. The state will be used to transfer data to event functions
+            //    UdpState state = new UdpState();
+            //    state.endPoint = endPoint;
+            //    state.listenerSocket = listenerSocket;
+            //    state.discoveryService = this;
+
+            //    // Debugging code to show the UDP port that we are bind to
+            //    System.Diagnostics.Debug.Print("Local UDP Port: {0}", ((IPEndPoint)(listenerSocket.Client.LocalEndPoint)).Port);
+
+            //    // Start the listening process as a callback
+            //    listenerSocket.BeginReceive(new AsyncCallback(UDPReceiveCallback), state);
+            //}
+            //catch (Exception ex)
+            //{
+            //    applicationPresenter.ShowErrorMessage("Can not start the browser service!");
+            //    System.Diagnostics.Debug.Print("Start listenerSocket meet exception {0}", ex.ToString());
+            //}
+           
+        }
+
+        private void CreateListenerSockets()
+        {
+            IPAddress ipAddr = IPAddress.Any;
+            listenerSockets.Clear();
+
+            foreach (NetworkInterface netif in NetworkInterface.GetAllNetworkInterfaces())
+            {
+                IPInterfaceProperties properties = netif.GetIPProperties();
+
+                foreach (IPAddressInformation unicast in properties.UnicastAddresses)
+                {
+                    ipAddr = unicast.Address;
+
+                    // We're only interested in IPv4 addresses for now
+                    if (ipAddr.AddressFamily != AddressFamily.InterNetwork)
+                        continue;
+
+                    // Ignore loopback addresses (e.g., 127.0.0.1)
+                    if (IPAddress.IsLoopback(ipAddr))
+                        continue;
+
+                    // Create the Listening Socket 
+                    // Create the socket using 0 as the port so we get
+                    // an available free socket port
+                    IPEndPoint endPoint = new IPEndPoint(ipAddr, 0);
+                    UdpClient newSocket = null;
+                    try
+                    {
+                        newSocket = new UdpClient(endPoint);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.ToString());
+                        continue;
+                    }
+
+                    listenerSockets.Add(newSocket);
+
+                    // Create the state. The state will be used to transfer data to event functions
+                    UdpState state = new UdpState();
+                    state.endPoint = endPoint;
+                    state.listenerSocket = newSocket;
+                    state.discoveryService = this;
+
+                    // Debugging code to show the UDP port that we are bind to
+                    System.Diagnostics.Debug.Print("Local UDP Port: {0}", ((IPEndPoint)(newSocket.Client.LocalEndPoint)).Port);
+
+                    // Start the listening process as a callback
+                    newSocket.BeginReceive(new AsyncCallback(UDPReceiveCallback), state);
+                }
+            }
         }
 
         private static void UDPReceiveCallback(IAsyncResult ar)
@@ -96,7 +159,7 @@ namespace GatewayBrowser.Help
 
                 // Abort if not received data or response is not Discover Service
                 // Make sure the received message length is right
-                if (responseSerialNumber.Length > 2)
+                if (responseSerialNumber!= null && responseSerialNumber.Length > 2)
                 {
                     BecaonDevice newBecaonDevice;
                     string secIFCName = xn.GetValue("DiscoveryResponse>0>NetworkConfig>0>Interface>1>@Name");
@@ -153,9 +216,12 @@ namespace GatewayBrowser.Help
         {
             deviceConfig = null;
 
+            CreateListenerSockets();
+
             // Set the Broadcast address as an end point. Then the browse commands will be
             // sent to this end point
             IPEndPoint sending_end_point;
+            //sending_end_point = new IPEndPoint(IPAddress.Parse("192.168.0.255"), beaconDiscoveryListenPort);
             sending_end_point = new IPEndPoint(IPAddress.Parse("255.255.255.255"), beaconDiscoveryListenPort);
 
             string strSendText = "<?xml version='1.0' encoding='UTF-8'?>" +
@@ -163,16 +229,18 @@ namespace GatewayBrowser.Help
                 "<GetConfig/>" +
                 "</DiscoveryRequest>";
             byte[] byteData = System.Text.Encoding.UTF8.GetBytes(strSendText);
-            //byte[] byteData = Encoding.ASCII.GetBytes("DiscoverRQ");
 
             try
             {
-                listenerSocket.Send(byteData, byteData.Length, sending_end_point);
+                foreach (UdpClient socket in listenerSockets)
+                {
+                    socket.Send(byteData, byteData.Length, sending_end_point);
+                }
             }
             catch (Exception)
             {
                 System.Diagnostics.Debug.Print("Problem transmitting data, probably no ethernet adapters are connected.");
-            } 
+            }
 
             return;
         }
@@ -181,6 +249,8 @@ namespace GatewayBrowser.Help
         {
             deviceConfig = null;
 
+            CreateListenerSockets();
+
             // Set the Broadcast address as an end point. Then the browse commands will be
             // sent to this end point
             IPEndPoint sending_end_point;
@@ -188,6 +258,8 @@ namespace GatewayBrowser.Help
 
             StringBuilder msg = new StringBuilder();
             msg.Append("<?xml version='1.0' encoding='UTF-8'?>\n");
+            msg.Append("<DiscoveryRequest>\n");
+            msg.Append("<ChangeTempIP>\n");
             msg.Append("<SerialNumber>");
             msg.Append(device.SerialNumber);
             msg.Append("</SerialNumber>\n");
@@ -200,11 +272,15 @@ namespace GatewayBrowser.Help
             msg.Append("<Netmask>");
             msg.Append(newTemporaryNetMask);
             msg.Append("</Netmask>\n");
+            msg.Append("</ChangeTempIP>\n");
             msg.Append("</DiscoveryRequest>");
 
             string strSendText = msg.ToString();
             byte[] byteData = System.Text.Encoding.UTF8.GetBytes(strSendText);
-            listenerSocket.Send(byteData, byteData.Length, sending_end_point);
+            foreach (UdpClient socket in listenerSockets)
+            {
+                socket.Send(byteData, byteData.Length, sending_end_point);
+            }
 
             return;
 
@@ -213,6 +289,7 @@ namespace GatewayBrowser.Help
         public void removeTemporaryIPAddr(BecaonDevice device)
         {
             deviceConfig = null;
+            CreateListenerSockets();
 
             // Set the Broadcast address as an end point. Then the browse commands will be
             // sent to this end point
@@ -221,26 +298,35 @@ namespace GatewayBrowser.Help
 
             StringBuilder msg = new StringBuilder();
             msg.Append("<?xml version='1.0' encoding='UTF-8'?>\n");
+            msg.Append("<DiscoveryRequest>\n");
+            msg.Append("<RemoveTempIP>\n");
             msg.Append("<SerialNumber>");
             msg.Append(device.SerialNumber);
             msg.Append("</SerialNumber>\n");
             msg.Append("<MACAddress>");
             msg.Append(device.TempMACAddress);
             msg.Append("</MACAddress>\n");
-            msg.Append("<RemoveTempIP/>\n");
+            msg.Append("</RemoveTempIP>\n");
             msg.Append("</DiscoveryRequest>");
             string strSendText = msg.ToString();
 
             byte[] byteData = System.Text.Encoding.UTF8.GetBytes(strSendText);
-            listenerSocket.Send(byteData, byteData.Length, sending_end_point);
-            _applicationPresenter.StatusText = string.Format("Becaon Device Temporary IP '{0}' was removed.", device.LookupName);
 
+            foreach (UdpClient socket in listenerSockets)
+            {
+                socket.Send(byteData, byteData.Length, sending_end_point);
+            }
+
+            // Set the status bar message
+            _applicationPresenter.StatusText = string.Format("Becaon Device Temporary IP '{0}' was removed.", device.LookupName);
             return;
 
         }
 
         public void changePermanentIPAddrs(BecaonDevice device)
         {
+            CreateListenerSockets();
+
             // Set the Broadcast address as an end point. Then the browse commands will be
             // sent to this end point
             IPEndPoint sending_end_point;
@@ -256,34 +342,47 @@ namespace GatewayBrowser.Help
             msg.Append("<MACAddress>");
             msg.Append(device.TempMACAddress);
             msg.Append("</MACAddress>\n");
-            msg.Append("</SetIPConfig>\n");
-            msg.Append("</DiscoveryRequest>");
-
-            msg.Append("ChangeIPAddrsRQ\n");
-            msg.Append(device.SerialNumber);
-            msg.Append("\n");
-            msg.Append(device.IfcName);
-            msg.Append("\n");
-            msg.Append(device.MainMACAddress);
-            msg.Append("\n");
+            msg.Append("<Network>\n");
+            //msg.Append("<Name>");
+            //msg.Append(device.IfcName);
+            //msg.Append("</Name>\n");
+            msg.Append("<IPAddress>");
             msg.Append(device.MainIpAddress);
-            msg.Append("\n");
+            msg.Append("</IPAddress>\n");
+            msg.Append("<Netmask>");
             msg.Append(device.MainIpNetmask);
+            msg.Append("</Netmask>\n");
+            //msg.Append("<Gateway>");
+            //msg.Append("");
+            //msg.Append("</Gateway>\n");
+            msg.Append("</Network>\n");
 
             if (device.GetIfcCount() > 1)
             {
-                msg.Append("\n");
-                msg.Append(device.SecIfcName);
-                msg.Append("\n");
-                msg.Append(device.SecMACAddress);
-                msg.Append("\n");
+                msg.Append("<Network>\n");
+                //msg.Append("<Name>");
+                //msg.Append(device.SecIfcName);
+                //msg.Append("</Name>\n");
+                msg.Append("<IPAddress>");
                 msg.Append(device.SecIpAddress);
-                msg.Append("\n");
+                msg.Append("</IPAddress>\n");
+                msg.Append("<Netmask>");
                 msg.Append(device.SecIpNetmask);
+                msg.Append("</Netmask>\n");
+                //msg.Append("<Gateway>");
+                //msg.Append("");
+                //msg.Append("</Gateway>\n");
+                msg.Append("</Network>\n");
             }
 
+            msg.Append("</SetIPConfig>\n");
+            msg.Append("</DiscoveryRequest>");
+
             byte[] byteData = Encoding.ASCII.GetBytes(msg.ToString());
-            listenerSocket.Send(byteData, byteData.Length, sending_end_point);
+            foreach (UdpClient socket in listenerSockets)
+            {
+                socket.Send(byteData, byteData.Length, sending_end_point);
+            }
 
             deviceConfig = device;
 
@@ -294,6 +393,7 @@ namespace GatewayBrowser.Help
         public void RebootModule(BecaonDevice device)
         {
             deviceConfig = null;
+            CreateListenerSockets();
 
             // Set the Broadcast address as an end point. Then the browse commands will be
             // sent to this end point
@@ -302,18 +402,23 @@ namespace GatewayBrowser.Help
 
             StringBuilder msg = new StringBuilder();
             msg.Append("<?xml version='1.0' encoding='UTF-8'?>\n");
+            msg.Append("<DiscoveryRequest>\n");
+            msg.Append("<RebootModule>\n");
             msg.Append("<SerialNumber>");
             msg.Append(device.SerialNumber);
             msg.Append("</SerialNumber>\n");
             msg.Append("<MACAddress>");
             msg.Append(device.TempMACAddress);
             msg.Append("</MACAddress>\n");
-            msg.Append("<RebootModule/>\n");
+            msg.Append("</RebootModule>\n");
             msg.Append("</DiscoveryRequest>");
 
             string strSendText = msg.ToString();
             byte[] byteData = System.Text.Encoding.UTF8.GetBytes(strSendText);
-            listenerSocket.Send(byteData, byteData.Length, sending_end_point);
+            foreach (UdpClient socket in listenerSockets)
+            {
+                socket.Send(byteData, byteData.Length, sending_end_point);
+            }
 
             _applicationPresenter.StatusText = string.Format("Becaon Device '{0}' was rebooted.", device.LookupName);
         }
@@ -329,6 +434,11 @@ namespace GatewayBrowser.Help
             return false;
         }
 
+        public void StopScan()
+        {
+            // do we need close the connection here?
+            //listenerSocket.
+        }
     }
 
 }

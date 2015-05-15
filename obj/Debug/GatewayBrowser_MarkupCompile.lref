@@ -1,9 +1,9 @@
 ﻿
-FO:\Training\GB\GatewayBrowser_0505\GatewayBrowser_0505\App.xaml;;
-FO:\Training\GB\GatewayBrowser_0505\GatewayBrowser_0505\Resources\DefaultStyles.xaml;;
-FO:\Training\GB\GatewayBrowser_0505\GatewayBrowser_0505\UserControls\IPTextBoxControl.xaml;;
-FO:\Training\GB\GatewayBrowser_0505\GatewayBrowser_0505\Views\SetIPTemporaryView.xaml;;
-FO:\Training\GB\GatewayBrowser_0505\GatewayBrowser_0505\Views\SetIPConfigView.xaml;;
-FO:\Training\GB\GatewayBrowser_0505\GatewayBrowser_0505\Views\AddGatewayView.xaml;;
-FO:\Training\GB\GatewayBrowser_0505\GatewayBrowser_0505\Views\Shell.xaml;;
+FE:\Beacon\GB\GatewayBrowser_0506\App.xaml;;
+FE:\Beacon\GB\GatewayBrowser_0506\Resources\DefaultStyles.xaml;;
+FE:\Beacon\GB\GatewayBrowser_0506\UserControls\IPTextBoxControl.xaml;;
+FE:\Beacon\GB\GatewayBrowser_0506\Views\SetIPTemporaryView.xaml;;
+FE:\Beacon\GB\GatewayBrowser_0506\Views\SetIPConfigView.xaml;;
+FE:\Beacon\GB\GatewayBrowser_0506\Views\AddGatewayView.xaml;;
+FE:\Beacon\GB\GatewayBrowser_0506\Views\Shell.xaml;;
 

@@ -9,16 +9,17 @@ namespace GatewayBrowser.Views
 {
     public partial class ProgessBarView : Window
     {
+        private readonly ApplicationPresenter _applicationPresenter;
 
         // Ping timeout for Used IP's search process
         private const int MAX_BROWSER_TIME = 15;
         private DispatcherTimer progessTimer;
 
-        public ProgessBarView()
+        public ProgessBarView(ApplicationPresenter applicationPresenter)
         {
             InitializeComponent();
             StartProgessBar();
-            
+            _applicationPresenter = applicationPresenter;
         }
 
         private void StartProgessBar()
@@ -45,6 +46,7 @@ namespace GatewayBrowser.Views
             if(pgb_browserProgess.Value > MAX_BROWSER_TIME -1 )
             {
                 progessTimer.Stop();
+                _applicationPresenter.StopScan();
                 this.Close();
             }
         }

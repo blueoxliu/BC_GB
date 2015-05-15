@@ -121,7 +121,9 @@ namespace GatewayBrowser.Views
                 tempbytes = BitConverter.GetBytes(currentAddr); 
                 Array.Reverse(tempbytes); 
                 IPAddress unusedIp = new IPAddress(tempbytes);
+                //////IPAddress x = IPAddress.Parse("192.168.1.200");
                 // Try to ping the address
+                /////reply = pingSender.Send(x, PING_TIMEOUT);
                 reply = pingSender.Send(unusedIp, PING_TIMEOUT);
                 // If ping is unsuccessfull return it as an unused IP Address
                 if (reply.Status != IPStatus.Success)
@@ -140,36 +142,72 @@ namespace GatewayBrowser.Views
         {
             // Check all Network interfaces and select the one that looks like
             // an active one
-            foreach (NetworkInterface f in NetworkInterface.GetAllNetworkInterfaces())
+            NetworkInterface[] nics = NetworkInterface.GetAllNetworkInterfaces();  
+            foreach (NetworkInterface adapter in nics)  
             {
-                //Console.WriteLine("New interface discovered: {0}", f.ToString());
-                //Console.WriteLine(f.Name);
-                IPInterfaceProperties ipInterface = f.GetIPProperties();
-                foreach (UnicastIPAddressInformation unicastAddress in ipInterface.UnicastAddresses)
+                bool Pd1 = (adapter.NetworkInterfaceType == NetworkInterfaceType.Ethernet || adapter.NetworkInterfaceType == NetworkInterfaceType.Wireless80211); //判断是否是以太网连接  
+
+                if (Pd1 && adapter.OperationalStatus == OperationalStatus.Up)
                 {
-                    IPAddress ipAddr = unicastAddress.Address;
-                    IPAddress netMask = unicastAddress.IPv4Mask;
-
-                    if ((ipAddr != null) && (netMask != null))
+                    IPInterfaceProperties ip = adapter.GetIPProperties();     //IP配置信息 
+                    if (ip.UnicastAddresses.Count > 0)
                     {
-                        // Found a valid interface. Only an IP is suggested for the 
-                        // first valid interface
-                        suggestedNetMask = netMask.ToString();
-                        
-                        byte[] nmBin = netMask.GetAddressBytes();
-                        byte[] ipBin = ipAddr.GetAddressBytes();
+                        IPAddress ipAddr = ip.UnicastAddresses[1].Address;//IP地址  
+                        IPAddress netMask = ip.UnicastAddresses[1].IPv4Mask;//子网掩码  
 
-                        IPAddress unusedIP = findUnusedIP(ipAddr, netMask);
-                        if (unusedIP != null)
+                        if ((ipAddr != null) && (netMask != null))
                         {
-                            suggestedIP = unusedIP.ToString();
-                        }
-                        else
-                        {
-                            suggestedIP = null;
+                            // Found a valid interface. Only an IP is suggested for the 
+                            // first valid interface
+                            suggestedNetMask = netMask.ToString();
+
+                            byte[] nmBin = netMask.GetAddressBytes();
+                            byte[] ipBin = ipAddr.GetAddressBytes();
+
+                            IPAddress unusedIP = findUnusedIP(ipAddr, netMask);
+                            if (unusedIP != null)
+                            {
+                                suggestedIP = unusedIP.ToString();
+                            }
+                            else
+                            {
+                                suggestedIP = null;
+                            }
                         }
                     }
+
+                   
                 }
+
+                //Console.WriteLine("New interface discovered: {0}", f.ToString());
+                //Console.WriteLine(f.Name);
+                //IPInterfaceProperties ipInterface = f.GetIPProperties();
+                //foreach (UnicastIPAddressInformation unicastAddress in ipInterface.UnicastAddresses)
+                //{
+                //    IPAddress ipAddr = unicastAddress.Address;
+                //    IPAddress netMask = unicastAddress.IPv4Mask;
+
+                //    if ((ipAddr != null) && (netMask != null))
+                //    {
+                //        // Found a valid interface. Only an IP is suggested for the 
+                //        // first valid interface
+                //        suggestedNetMask = netMask.ToString();
+                        
+                //        byte[] nmBin = netMask.GetAddressBytes();
+                //        byte[] ipBin = ipAddr.GetAddressBytes();
+
+                //        //IPAddress unusedIP = findUnusedIP(ipAddr, netMask);
+                //        IPAddress unusedIP = IPAddress.Parse("192.168.1.254");
+                //        if (unusedIP != null)
+                //        {
+                //            suggestedIP = unusedIP.ToString();
+                //        }
+                //        else
+                //        {
+                //            suggestedIP = null;
+                //        }
+                //    }
+                //}
             }  
         }
 

@@ -109,7 +109,6 @@ namespace GatewayBrowser.Presenters
             
         }
 
-
         public void ShowSetIPWindow(BecaonDevice gateway)
         {
             if (gateway == null) return;
@@ -124,6 +123,36 @@ namespace GatewayBrowser.Presenters
 
         }
 
+        public void SendContextMenuCommand(ContextMenuCommand cmdType, BecaonDevice gateway)
+        {
+            switch (cmdType)
+            {
+                case ContextMenuCommand.Reboot:
+                    //Debug.WriteLine("Case 1");
+                    this.beaconDiscoveryService.RebootModule(gateway);
+                    break;
+                case ContextMenuCommand.RemoveTempIP:
+                    //Debug.WriteLine("Case 2");
+                    this.beaconDiscoveryService.removeTemporaryIPAddr(gateway);
+                    break;
+                default:
+                    //Debug.WriteLine("Default case");
+                    break;
+            }
+        }
+
+        public void ShowErrorMessage(string errorString)
+        {
+            string strErrorString = errorString;
+            messageService.ShowMessage("", strErrorString);
+        }
+
+        public void StopScan()
+        {
+            beaconDiscoveryService.StopScan();
+        }
+
+        #region private function
         private void ShowAboutMessage()
         {
             string strHelpString = string.Format(CultureInfo.CurrentCulture, Resources.AboutText, ApplicationInfo.ProductName, ApplicationInfo.Version);
@@ -168,37 +197,33 @@ namespace GatewayBrowser.Presenters
             }
         }
 
+        private void DeleteOnlineDeviceBeforeScan()
+        {
+            foreach (BecaonDevice item in CurrentGateways)
+            {
+                if (item.DeviceStatus == GatewayStatus.Active)
+                {
+                    DeleteGateway(item);
+                }
+            }
+        }
+
         // Button that starts the network browsing.
         // Actually the browsing is almost inmediate but for customer feedback purposes
         // a progress bar is shown in the status strip
         private void StartScan()
         {
+            DeleteOnlineDeviceBeforeScan();
+
             beaconDiscoveryService.sendDiscoverRequest();
 
+            StatusText = string.Format("Start browsing Beacon gateway...");
             // Show progess bar when start scan.
-            ProgessBarView progessBarView = new ProgessBarView();
-            progessBarView.Owner = this.View;
-            progessBarView.ShowDialog();
+            //ProgessBarView progessBarView = new ProgessBarView(this);
+            //progessBarView.Owner = this.View;
+            //progessBarView.ShowDialog();
         }
 
-        public void SendContextMenuCommand(ContextMenuCommand cmdType, BecaonDevice gateway)
-        {
-            switch (cmdType)
-            {
-                case ContextMenuCommand.Reboot:
-                    //Debug.WriteLine("Case 1");
-                    this.beaconDiscoveryService.RebootModule(gateway);
-                    break;
-                case ContextMenuCommand.RemoveTempIP:
-                    //Debug.WriteLine("Case 2");
-                    this.beaconDiscoveryService.removeTemporaryIPAddr(gateway);
-                    break;
-                default:
-                    //Debug.WriteLine("Default case");
-                    break;
-            }
-        }
-
-
+#endregion
     }
 }

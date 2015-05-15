@@ -4,16 +4,16 @@
 winexe
 C#
 .cs
-O:\Training\GB\GatewayBrowser_0505\GatewayBrowser_0505\obj\Debug\
+E:\Beacon\GB\GatewayBrowser_0506\obj\Debug\
 GatewayBrowser
 none
 false
 DEBUG;TRACE
-O:\Training\GB\GatewayBrowser_0505\GatewayBrowser_0505\App.xaml
+E:\Beacon\GB\GatewayBrowser_0506\App.xaml
 11-1618456294
 
 331857931929
-151624105057
+15303550824
 Resources\ColorsAndBrushes.xaml;Resources\DefaultStyles.xaml;Resources\ImageResources.xaml;UserControls\IPTextBoxControl.xaml;UserControls\SideBar.xaml;Views\SetIPTemporaryView.xaml;Views\SetIPConfigView.xaml;Views\AddGatewayView.xaml;Views\ProgessBarView.xaml;Views\ConfigWebContainerView.xaml;Views\Shell.xaml;
 
 False

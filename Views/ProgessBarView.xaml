@@ -4,7 +4,7 @@
           Title="Browsering Beacon Gateway"
           WindowStartupLocation="CenterOwner"
           ResizeMode="NoResize"
-          Width="398" Height="168">
+          Width="398" Height="158">
     <DockPanel Margin="5">
 
         <StackPanel DockPanel.Dock="Bottom" Style="{StaticResource buttonPanel}" Width="260"/>
@@ -19,10 +19,10 @@
                 <RowDefinition Height="117*"/>
                 <RowDefinition Height="41*"/>
             </Grid.RowDefinitions>
-            <ProgressBar x:Name="pgb_browserProgess" HorizontalAlignment="Left" Height="26" Margin="49,40,0,0" VerticalAlignment="Top" Width="291" Grid.ColumnSpan="3"/>
+            <ProgressBar x:Name="pgb_browserProgess" HorizontalAlignment="Left" Height="26" Margin="52,42,0,0" VerticalAlignment="Top" Width="291" Grid.ColumnSpan="3"/>
             <Button Content="Stop Browseing"
-            	Click="Stop_Click"  Grid.Column="1" Margin="56,89,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" Width="88" Height="28" Grid.RowSpan="2" />
-            <Label x:Name="lbl_progessText" Content="Browseing 0 %" HorizontalAlignment="Left" Margin="49,14,0,0" VerticalAlignment="Top" Grid.ColumnSpan="3" Width="291"/>
+            	Click="Stop_Click"  Grid.Column="1" Margin="49,0,0,10" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="88" Height="28" Grid.RowSpan="2" />
+            <Label x:Name="lbl_progessText" Content="Browseing 0 %" HorizontalAlignment="Left" Margin="52,15,0,0" VerticalAlignment="Top" Grid.ColumnSpan="3" Width="291"/>
         </Grid>
     </DockPanel>
 </Window>
